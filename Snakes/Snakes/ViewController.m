@@ -13,6 +13,7 @@
 @property (weak, nonatomic) IBOutlet UIView *backView;
 @property (nonatomic,strong) SnakeBody *snakeBody;
 @property (weak, nonatomic) IBOutlet UILabel *scoreLable;
+@property (weak, nonatomic) IBOutlet UIButton *startBtn;
 @property (nonatomic,strong) NSMutableArray<UIView*> *foods;
 @property(nonatomic,assign) int score;
 @end
@@ -45,9 +46,9 @@
     }
     for (int i =0; i<10; i++) {
         for (int j=0; j<10; j++) {
-            int width = arc4random()%11+3;
+            int width = arc4random()%51+3;//食物的大小，同时也是分数的大小，初始值11
             UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, width, width)];
-            view.backgroundColor = [UIColor colorWithRed:(random()%256)/256.0 green:(random()%256)/256.0 blue:(random()%256)/256.0 alpha:1];
+            view.backgroundColor = [UIColor colorWithRed:(random()%256)/256.0 green:(random()%256)/256.0 blue:(random()%256)/256.0 alpha:1];//随机颜色
             view.center = CGPointMake(random()%((int)[UIScreen mainScreen].bounds.size.width-30)+15, random()%((int)[UIScreen mainScreen].bounds.size.height-30)+15);
             view.layer.cornerRadius = width/2;
             [self.backView addSubview:view];
@@ -75,16 +76,19 @@
 -(void)snakeDidMove2Frame:(CGRect)rect{
     if (!CGRectContainsRect(self.view.bounds, rect)) {
         //超出边界
-        [self restart:nil];
+//        [self restart:nil];
+        self.startBtn.tag = !self.startBtn.tag;
+        self.snakeBody.isMoving = NO;
+        [self.startBtn setTitle:@"开始" forState:UIControlStateNormal];
     }
     [self.foods enumerateObjectsUsingBlock:^(UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         //碰撞检测
-        if (CGRectContainsPoint(rect, obj.center)) {
+        if (CGRectContainsPoint(rect, obj.center)) {//吃掉食物
             *stop=YES;
             [obj removeFromSuperview];
             [self.foods removeObject:obj];
-            self.score+=obj.bounds.size.width/3;
-            [self.snakeBody eatFoodCount:obj.bounds.size.width/3];
+            self.score+=obj.bounds.size.width/3;//吃掉的食物宽度即分数，同时也是蛇的长度
+            [self.snakeBody eatFoodCount:obj.bounds.size.width/3 color:obj.backgroundColor];
         }
     }];
 }
